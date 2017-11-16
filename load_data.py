@@ -52,6 +52,6 @@ class load_data:
         self.tag_train = tag_train
         self.tag_test = tag_test
         self.tag_val = tag_val
-        self.train = train
-        self.test = test
-        self.val = val
+        self.train = train.T
+        self.test = test.T
+        self.val = val.T
