@@ -13,6 +13,22 @@ class load_data:
         test_set = data[test_indices]
         return train_set, test_set
 
+    def retag(self,tag):
+        tag_array = np.zeros(len(self.tag_train))
+        for i in range(0, len(self.tag_train)):
+            if self.tag_train[i]==tag:
+                tag_array[i]=1
+        return tag_array
+
+################################################
+    def selection_data_from_tag(self,tag):
+
+        tag_train_list = list(self.tag_train.astype(int))
+        list_int = list(map(int,tag_train_list))
+        indexA = [i for i,x in enumerate(list_int) if x== tag]
+        indexB = [i for i,x in enumerate(list_int) if x!= tag]
+        return self.train[indexA], self.train[indexB]
+################################################
     def scale_to_unit(self, data, max):
         return np.array([data[:, itera] / max[itera] for itera in range(max.__len__())])
 
