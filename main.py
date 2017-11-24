@@ -1,6 +1,7 @@
 import numpy as np
 from load_data import load_data
 from matplotlib import pyplot as plt
+from sklearn.linear_model import SGDClassifier
 
 #Fijar semilla
 np.random.seed(seed=42)
@@ -25,10 +26,13 @@ def choose_classifier(option=4):
     return clf
 
 if __name__=='__main__':
-    data2train = load_data('dataset_Facebook_selected_categories.csv',0.2,0.2)
+    data2train = load_data('dataset_Facebook_selected_categories.csv',
+                           fraction_Test = 0.2,
+                           fraction_Validation = 0.2,
+                           selected_features = (0,2))
     print(data2train.train)
 
-    features = data2train.train[:,(0,2)]
+    features = data2train.train
 
 
     new_tags = data2train.retag(3)
@@ -39,6 +43,9 @@ if __name__=='__main__':
 
 
     featureA, featureB = data2train.selection_data_from_tag(3)
+
+
+
 
     # --- Plot  ------------------------------------------
     Ngrid = 100
@@ -55,34 +62,34 @@ if __name__=='__main__':
         t = (max(yhat) - min(yhat)) * threshold + min(yhat)
         yhat = (yhat > t)
     yhat = yhat.reshape([Ngrid, Ngrid])
-    plt.imshow(yhat, origin="lower", extent=[0, 20, 0, 20], cmap=cmap, alpha=0.3)
+    plt.contour(yhat, origin="lower", extent=[0, 1, 0, 1], cmap=cmap, alpha=0.3)
 
-    plt.plot(featureA[:,1], featureA[:,0], 'yo', alpha=.15)
-    plt.plot(featureB[:,1], featureB[:,0], 'bx', alpha=.15)
+    plt.plot(featureA[:,0], featureA[:,1], 'yo', alpha=.15)
+    plt.plot(featureB[:,0], featureB[:,1], 'bx', alpha=.15)
 
     strTitle = "Non-linear classifier"
     plt.title(strTitle)
-    plt.axis([0, 0.5, 0, 0.5])  # <--This axis are set for features number 0(featX_index) and 4(featY_index).
+    plt.axis([0, 1, 0, 1])  # <--This axis are set for features number 0(featX_index) and 4(featY_index).
     #    If you pick another two it is likely to need another axis
 
     plt.show()
 
 
 
-    # plt.plot(featureA[:,1],featureA[:,0], 'yo', alpha=.1)
-    # plt.plot(featureB[:,1],featureB[:,0], 'bx', alpha=.1)
-    #
-    # w = clf.coef_[0]
-    # a = -w[0] / w[1]
-    # xx = np.linspace(0, 0.5)
-    # yy = a * xx - (clf.intercept_[0] / w[1])
-    #
-    # plt.plot(xx, yy, 'r')
-    # strTitle = "w_X = %2.2f, w_Y = %2.2f, w_0 = %2.2f " % (w[0], w[1], clf.intercept_[0])
-    # #strTitle ='a'
-    # plt.title(strTitle)
-    # #plt.axis([0, 20, 0, 20])
-    #
-    # plt.show()
+    plt.plot(featureA[:,1],featureA[:,0], 'yo', alpha=.1)
+    plt.plot(featureB[:,1],featureB[:,0], 'bx', alpha=.1)
+
+    w = clf.coef_[0]
+    a = -w[0] / w[1]
+    xx = np.linspace(0, 0.5)
+    yy = a * xx - (clf.intercept_[0] / w[1])
+
+    plt.plot(xx, yy, 'r')
+    strTitle = "w_X = %2.2f, w_Y = %2.2f, w_0 = %2.2f " % (w[0], w[1], clf.intercept_[0])
+    #strTitle ='a'
+    plt.title(strTitle)
+    #plt.axis([0, 20, 0, 20])
+
+    plt.show()
 
 

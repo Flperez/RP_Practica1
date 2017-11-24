@@ -2,9 +2,14 @@ import numpy as np
 
 
 class load_data:
-    # TODO: Preguntar a Alfredo si separar por categorias antes de separar por train,test,validation
 
     def split_train_test(self, data, test_ratio):
+        '''
+        Dividimos los datos de entrada para training,validation y test
+        :param data: datos de entrada
+        :param test_ratio: ratio de division de los datos
+        :return: conjunto de datos para training (train_set) y para test (test_set)
+        '''
         shuffled_indices = np.random.permutation(len(data))
         test_set_size = int(len(data) * test_ratio)
         test_indices = shuffled_indices[:test_set_size]
@@ -14,6 +19,12 @@ class load_data:
         return train_set, test_set
 
     def retag(self,tag):
+        '''
+        Funcion que recibe la etiqueta que deseamos tocar como 1 y modifica el
+        el tag_train para solo seleccionar la etiqueta deseada
+        :param tag: etiqueta que deseamos utilizar como 1
+        :return: devuelve un vector con 0 y 1
+        '''
         tag_array = np.zeros(len(self.tag_train))
         for i in range(0, len(self.tag_train)):
             if self.tag_train[i]==tag:
@@ -22,17 +33,31 @@ class load_data:
 
 ################################################
     def selection_data_from_tag(self,tag):
+        '''
+
+        :param tag:
+        :return:
+        '''
 
         tag_train_list = list(self.tag_train.astype(int))
         list_int = list(map(int,tag_train_list))
         indexA = [i for i,x in enumerate(list_int) if x== tag]
         indexB = [i for i,x in enumerate(list_int) if x!= tag]
         return self.train[indexA], self.train[indexB]
+
 ################################################
     def scale_to_unit(self, data, max):
+        '''
+        Reescalado de 0-1
+        :param data: datos
+        :param max: array de los max para cada features
+        :return: devuelve un np.array reescalado
+        '''
         return np.array([data[:, itera] / max[itera] for itera in range(max.__len__())])
 
-    def __init__(self,path, fraction_Test, fraction_Validation):
+################################################
+
+    def __init__(self,path, fraction_Test, fraction_Validation,selected_features):
 
         # Cargar datos
         data_load = np.genfromtxt(fname=path, delimiter=';', skip_header=1,
@@ -69,5 +94,9 @@ class load_data:
         self.tag_test = tag_test
         self.tag_val = tag_val
         self.train = train.T
+
+        self.train = train[selected_features,:].T
         self.test = test.T
+        self.test = test[selected_features,:].T
         self.val = val.T
+        self.val = val[selected_features,:].T
