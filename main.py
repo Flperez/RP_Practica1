@@ -30,7 +30,8 @@ if __name__=='__main__':
                            fraction_Test = 0.2,
                            fraction_Validation = 0.2,
                            selected_features = (0,2))
-    print(data2train.train)
+    #print(data2train.train)
+
 
     features = data2train.train
 
@@ -92,4 +93,4 @@ if __name__=='__main__':
 
     plt.show()
 
-
+    #TODO: Falta crear una funcion que te devuelva la matriz de confusion

@@ -100,3 +100,7 @@ class load_data:
         self.test = test[selected_features,:].T
         self.val = val.T
         self.val = val[selected_features,:].T
+
+
+
+
