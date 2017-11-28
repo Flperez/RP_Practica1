@@ -1,7 +1,7 @@
 import numpy as np
 from load_data import load_data
 from matplotlib import pyplot as plt
-from sklearn.linear_model import SGDClassifier
+from load_data import confusion_matrix
 
 #Fijar semilla
 np.random.seed(seed=42)
@@ -24,6 +24,8 @@ def choose_classifier(option=4):
         print('choose one classifying method !')
         clf = []
     return clf
+
+
 
 if __name__=='__main__':
     data2train = load_data('dataset_Facebook_selected_categories.csv',
@@ -82,7 +84,7 @@ if __name__=='__main__':
 
     w = clf.coef_[0]
     a = -w[0] / w[1]
-    xx = np.linspace(0, 0.5)
+    xx = np.linspace(0,1)
     yy = a * xx - (clf.intercept_[0] / w[1])
 
     plt.plot(xx, yy, 'r')
@@ -92,5 +94,3 @@ if __name__=='__main__':
     #plt.axis([0, 20, 0, 20])
 
     plt.show()
-
-    #TODO: Falta crear una funcion que te devuelva la matriz de confusion

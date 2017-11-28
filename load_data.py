@@ -104,3 +104,11 @@ class load_data:
 
 
 
+def confusion_matrix(label_estimated,label_real,classes):
+    matriz=np.zeros((classes,classes))
+    for i in range(0,len(label_estimated)):
+        matriz[label_real[i],label_estimated[i]]+=1
+    return matriz
+
+
+
