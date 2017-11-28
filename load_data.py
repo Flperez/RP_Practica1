@@ -25,26 +25,59 @@ class load_data:
         :param tag: etiqueta que deseamos utilizar como 1
         :return: devuelve un vector con 0 y 1
         '''
-        tag_array = np.zeros(len(self.tag_train))
+        train_array = np.zeros(len(self.tag_train))
         for i in range(0, len(self.tag_train)):
             if self.tag_train[i]==tag:
-                tag_array[i]=1
-        return tag_array
+                train_array[i]=1
+
+        val_array = np.zeros(len(self.tag_val))
+        for i in range(0, len(self.tag_val)):
+            if self.tag_val[i] == tag:
+                val_array[i] = 1
+
+        test_array = np.zeros(len(self.tag_test))
+        for i in range(0, len(self.tag_test)):
+            if self.tag_test[i] == tag:
+                test_array[i] = 1
+        return train_array,val_array,test_array
 
 ################################################
-    def selection_data_from_tag(self,tag):
+    def selection_data_from_tag(self,tag,selection):
         '''
 
         :param tag:
         :return:
         '''
 
-        tag_train_list = list(self.tag_train.astype(int))
-        list_int = list(map(int,tag_train_list))
-        indexA = [i for i,x in enumerate(list_int) if x== tag]
-        indexB = [i for i,x in enumerate(list_int) if x!= tag]
-        return self.train[indexA], self.train[indexB]
 
+        #Queremos obtener los datos de entrenamiento
+        if selection == "train":
+            tag_train_list = list(self.tag_train.astype(int))
+            list_int = list(map(int,tag_train_list))
+            indexA = [i for i,x in enumerate(list_int) if x== tag]
+            indexB = [i for i,x in enumerate(list_int) if x!= tag]
+            dataA = self.train[indexA]
+            dataB = self.train[indexB]
+
+        if selection == "validation":
+            tag_val_list = list(self.tag_val.astype(int))
+            list_int = list(map(int, tag_val_list))
+            indexA = [i for i, x in enumerate(list_int) if x == tag]
+            indexB = [i for i, x in enumerate(list_int) if x != tag]
+            dataA = self.val[indexA]
+            dataB = self.val[indexB]
+
+        if selection == "test":
+            tag_test_list = list(self.tag_test.astype(int))
+            list_int = list(map(int, tag_test_list))
+            indexA = [i for i, x in enumerate(list_int) if x == tag]
+            indexB = [i for i, x in enumerate(list_int) if x != tag]
+            dataA = self.val[indexA]
+            dataB = self.val[indexB]
+
+
+
+        return dataA,dataB
 ################################################
     def scale_to_unit(self, data, max):
         '''
