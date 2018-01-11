@@ -1,0 +1,37 @@
+El conjunto de datos consta de entre 14 y 30 ejemplos de terrenos de 9 clases diferentes, fotografiados desde el aire. 
+
+Cada ejemplo tiene 147 características, extraidas mediante técnicas de visión artificial. 
+Estas características, además, se toman a diferetes resoluciones, por lo que se repiten en el conjunto de datos, pero seguidas por un número que indica la resolución. 
+Por ejemplo, Mean_G es el valor medio de color verde, pero lo podemos encontrar 7 veces:
+Mean_G, Mean_G_40, Mean_G_60, Mean_G_80, Mean_G_100, Mean_G_120, Mean_G_140.
+Por último, la clase de cada ejemplo es la 1a. columna, y las posibilidades son: "trees", "grass", "soil", "concrete", "asphalt", "buildings", "cars", "pools" y "shadows".
+
+La tabla de abajo asocia el acrónimo de cada columna con su significado.
+
+*****************************************************************
+Columna:   Significado
+*****************************************************************
+Class:     Etiqueta del terreno 
+-----------------------------------------------------------------
+BrdIndx:   Border Index 
+Area:      Area in m2 
+Round:     Roundness 
+Bright:    Brightness 
+Compact:   Compactness 
+ShpIndx:   Shape Index 
+Mean_G:    Green 
+Mean_R:    Red 
+Mean_NIR:  Near Infrared 
+SD_G:      Standard deviation of Green 
+SD_R:      Standard deviation of Red 
+SD_NIR:    Standard deviation of Near Infrared 
+LW:        Length/Width 
+GLCM1:     Gray-Level Co-occurrence Matrix 
+Rect:      Rectangularity 
+GLCM2:     Another Gray-Level Co-occurrence Matrix attribute 
+Dens:      Density 
+Assym:     Assymetry 
+NDVI:      Normalized Difference Vegetation Index 
+BordLngth: Border Length 
+GLCM3:     Another Gray-Level Co-occurrence Matrix attribute  
+*****************************************************************

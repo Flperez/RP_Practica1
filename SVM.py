@@ -46,6 +46,7 @@ if __name__=='__main__':
     degrees = [4,3,2]
     gammas = [1/13,1/12,1/11,1/10,1/9,1/8,1/7,1/6,1/5,1/4,1/3,1/2]
     scores_iter_hiper = []
+    best_models =[]
 ############################################################################################
 
     ##############################
@@ -61,6 +62,7 @@ if __name__=='__main__':
 
             model = SVC(kernel='linear',C=paramC, random_state=0)
             model_trained = OneVsOneClassifier(model).fit(X_train, y_train)
+            model.fit(X_train,y_train)
             prediction = model_trained.score(X_val, y_val)
             models.append(model_trained)
             scores.append(prediction)
