@@ -45,7 +45,7 @@ if __name__=='__main__':
     # r no se va a configurar ya que es el termino independiente
     #C es para todos los SVM, d es el grado del polinomio en el polinomico y gamma para todos excepto lineal
     Cs = [1000000,10000,1000,100,10,1,0.1,0.01,0.001,0.0001,0.00001,0.000001,0.0000001]
-    degrees = [4,3,2]
+    degrees = [8,7,6,5,4,3,2]
     gammas = [1/13,1/12,1/11,1/10,1/9,1/8,1/7,1/6,1/5,1/4,1/3,1/2]
     #Estas 2 variables almacenan el mejor clasificador de cada tipo
     best_models_per_clasificator=[]
@@ -198,7 +198,7 @@ if __name__=='__main__':
               "da una precisión de ", best_precisionOO)
 
     ###########################################
-    # SVM RBF Gaussiano onevsOne
+    # SVM RBF Gaussiano onevsAll
     ###########################################
 
     # Resetear el vector donde se guardan los resultados
@@ -245,17 +245,313 @@ if __name__=='__main__':
 
     np_accuracy_C = np.array(accuracy_C)
     idx = np_accuracy_C.argmax()
-    best_precisionOO = np.max(np_accuracy_C)
+    best_precisionOA = np.max(np_accuracy_C)
     choosen_hiperparam_C_OA = value_C[idx]
     choosen_hiperparam_Gamma_OA = gammas[idx]
     choosen_model = best_models_gamma[idx]
 
-    best_score_per_clasificator.append(best_precisionOO)
+    best_score_per_clasificator.append(best_precisionOA)
     best_models_per_clasificator.append(choosen_model)
 
     print("Realizando SVM con kernel RBF gaussiano One vs All, el mejor hiperparámetro C es",
           choosen_hiperparam_C_OA, 'el mejor hiperparámetro gamma es', choosen_hiperparam_Gamma_OA,
           "da una precisión de ", best_precisionOA)
+
+    ###########################################
+    # SVM Sigmoid onevsOne
+    ###########################################
+
+    # Resetear el vector donde se guardan los resultados
+    accuracy_C = []  # Guarda para cada gamma el mejor score obtenido sobre todos los C
+    value_C = []  # Guarda para cada gamma el mejor C obtenido sobre todos los C
+    best_models_gamma = []  # Guarda para cada gamma el mejor modelo obtenido sobre todos los C
+    for gamma in gammas:
+        # Resetear el vector donde se guardan los resultados
+        scores_iter_hiper = []  # Guarda los scores del barrido de C
+        best_models_C = []  # Guarda los mejores modelos del barrido de C
+        for paramC in Cs:
+            # Aplicando validacion cruzada seleccionamos el que más se aproxime a la media
+            scores = []
+            models = []
+            # Se realiza validación cruzada separando en 5 grupos
+            kf = KFold(n_splits=5)
+            for train, val in kf.split(X_muestra):
+                X_train, X_val, y_train, y_val = X_muestra[train], X_muestra[val], y_muestra[train], y_muestra[val]
+
+                # Definición y entrenamiento del modelo
+                model = SVC(kernel='sigmoid', C=paramC, gamma=gamma, random_state=0)
+                model_trained = OneVsOneClassifier(model).fit(X_train, y_train)
+                # Se guarda la precisión y el modelo obtenido
+                prediction = model_trained.score(X_val, y_val)
+                models.append(model_trained)
+                scores.append(prediction)
+
+            # calculo de precisión media sobre la validación cruzada
+            mean = sum(scores) / float(len(scores))
+            # Selección y almacenaje de la precisión más cercana a la media para extraer el modelo que está mas cercano a la media
+            idx = (np.abs(scores - mean)).argmin()
+            best_models_C.append(models[idx])
+            scores_iter_hiper.append(mean)
+
+        np_scores_iter_hiper = np.array(scores_iter_hiper)
+        # Sobre C, busqueda de la mayor precisión,su hiperparámetro y su modelo correspondiente
+        idx = np_scores_iter_hiper.argmax()
+        best_precisionOO = np.amax(np_scores_iter_hiper)
+        choosen_hiperparamOO = Cs[idx]
+        # Sobre C, almacenaje del modelo que ha dado la mejor precisión para el modelo
+        best_models_gamma.append(best_models_C[idx])
+        # Sobre C, almacenaje del la precisión y del valro del hiperparámetro C para cada gamma
+        accuracy_C.append(best_precisionOO)
+        value_C.append(choosen_hiperparamOO)
+
+    # Busqueda de la mayor precisión
+    np_accuracy_C = np.array(accuracy_C)
+    idx = np_accuracy_C.argmax()
+    best_precisionOO = np.max(np_accuracy_C)
+    # almacenaje del modelo que ha dado la mejor precisión para el modelo
+    choosen_hiperparam_C_OO = value_C[idx]
+    choosen_hiperparam_Gamma_OO = gammas[idx]
+    choosen_model = best_models_gamma[idx]
+    # Guardado en los vectores finales
+    best_score_per_clasificator.append(best_precisionOO)
+    best_models_per_clasificator.append(choosen_model)
+
+    print("Realizando SVM con kernel sigmoide One vs One, el mejor hiperparámetro C es",
+          choosen_hiperparam_C_OO, 'el mejor hiperparámetro gamma es', choosen_hiperparam_Gamma_OO,
+          "da una precisión de ", best_precisionOO)
+
+    ###########################################
+    # SVM Sigmoid onevsOne
+    ###########################################
+
+    # Resetear el vector donde se guardan los resultados
+    accuracy_C = []
+    value_C = []
+    best_models_gamma = []
+    for gamma in gammas:
+        # Resetear el vector donde se guardan los resultados
+        scores_iter_hiper = []
+        best_models_C = []
+        for paramC in Cs:
+            # Aplicando validacion cruzada seleccionamos el que más se aproxime a la media
+            scores = []
+            models = []
+            kf = KFold(n_splits=5)
+            for train, val in kf.split(X_muestra):
+                X_train, X_val, y_train, y_val = X_muestra[train], X_muestra[val], y_muestra[train], y_muestra[val]
+
+                model = SVC(kernel='sigmoid', C=paramC, gamma=gamma, random_state=0)
+                model_trained = OneVsRestClassifier(model).fit(X_train, y_train)
+                prediction = model_trained.score(X_val, y_val)
+                models.append(model_trained)
+                scores.append(prediction)
+
+            # print(scores)
+            mean = sum(scores) / float(len(scores))
+
+            idx = (np.abs(scores - mean)).argmin()
+            best_models_C.append(models[idx])
+
+            scores_iter_hiper.append(mean)
+            # print(scores_iter_hiper)
+
+        np_scores_iter_hiper = np.array(scores_iter_hiper)
+
+        idx = np_scores_iter_hiper.argmax()
+        best_precisionOA = np.amax(np_scores_iter_hiper)
+        choosen_hiperparamOA = Cs[idx]
+
+        best_models_gamma.append(best_models_C[idx])
+
+        accuracy_C.append(best_precisionOA)
+        value_C.append(choosen_hiperparamOA)
+
+    np_accuracy_C = np.array(accuracy_C)
+    idx = np_accuracy_C.argmax()
+    best_precisionOA = np.max(np_accuracy_C)
+    choosen_hiperparam_C_OA = value_C[idx]
+    choosen_hiperparam_Gamma_OA = gammas[idx]
+    choosen_model = best_models_gamma[idx]
+
+    best_score_per_clasificator.append(best_precisionOA)
+    best_models_per_clasificator.append(choosen_model)
+
+    print("Realizando SVM con kernel Sigmoide One vs All, el mejor hiperparámetro C es",
+          choosen_hiperparam_C_OA, 'el mejor hiperparámetro gamma es', choosen_hiperparam_Gamma_OA,
+          "da una precisión de ", best_precisionOA)
+
+    ###########################################
+    # SVM Poly onevsOne
+    ###########################################
+
+    # Resetear el vector donde se guardan los resultados
+    accuracy_gamma = []  # Guarda para cada gamma el mejor score obtenido sobre todos los C
+    value_gamma = []
+    best_models_degree = [] # Guarda para cada grado el mejor modelo obtenido sobre todos los gamma sobre todos los C
+    for degree in degrees:
+        accuracy_C = []  # Guarda para cada gamma el mejor score obtenido sobre todos los C
+        best_models_gamma = []  # Guarda para cada gamma el mejor modelo obtenido sobre todos los C
+        value_C = []  # Guarda para cada gamma el mejor C obtenido sobre todos los C
+        for gamma in gammas:
+            # Resetear el vector donde se guardan los resultados
+            scores_iter_hiper = []  #Guarda los scores del barrido de C
+            best_models_C = []      #Guarda los mejores modelos del barrido de C
+            for paramC in Cs:
+                # Aplicando validacion cruzada seleccionamos el que más se aproxime a la media
+                scores = []
+                models = []
+                # Se realiza validación cruzada separando en 5 grupos
+                kf = KFold(n_splits=5)
+                for train, val in kf.split(X_muestra):
+                    X_train, X_val, y_train, y_val = X_muestra[train], X_muestra[val], y_muestra[train], y_muestra[val]
+
+                    # Definición y entrenamiento del modelo
+                    model = SVC(kernel='poly', C=paramC,gamma=gamma,degree=degree, random_state=0)
+                    model_trained = OneVsOneClassifier(model).fit(X_train, y_train)
+                    # Se guarda la precisión y el modelo obtenido
+                    prediction = model_trained.score(X_val, y_val)
+                    models.append(model_trained)
+                    scores.append(prediction)
+
+                # calculo de precisión media sobre la validación cruzada
+                mean = sum(scores) / float(len(scores))
+                # Selección y almacenaje de la precisión más cercana a la media para extraer el modelo que está mas cercano a la media
+                idx = (np.abs(scores - mean)).argmin()
+                best_models_C.append(models[idx])
+                scores_iter_hiper.append(mean)
+
+            np_scores_iter_hiper = np.array(scores_iter_hiper)
+            # Sobre C, busqueda de la mayor precisión,su hiperparámetro y su modelo correspondiente
+            idx = np_scores_iter_hiper.argmax()
+            best_precisionOO = np.amax(np_scores_iter_hiper)
+            choosen_hiperparamOO = Cs[idx]
+            #Sobre C, almacenaje del modelo que ha dado la mejor precisión para el modelo
+            best_models_gamma.append(best_models_C[idx])
+            #Sobre C, almacenaje del la precisión y del valro del hiperparámetro C para cada gamma
+            accuracy_C.append(best_precisionOO)
+            value_C.append(choosen_hiperparamOO)
+
+        np_accuracy_C = np.array(accuracy_C)
+        # Sobre C, busqueda de la mayor precisión,su hiperparámetro y su modelo correspondiente
+        idx = np_accuracy_C.argmax()
+        best_precision_gamma_OO = np.amax(np_accuracy_C)
+        choosen_gammaOO = gammas[idx]
+        # Sobre C, almacenaje del modelo que ha dado la mejor precisión para el modelo
+        best_models_degree.append(best_models_gamma[idx])
+        # Sobre C, almacenaje del la precisión y del valro del hiperparámetro C para cada gamma
+        accuracy_gamma.append(best_precision_gamma_OO)
+        value_gamma.append(choosen_gammaOO)
+
+
+
+
+    #Busqueda de la mayor precisión
+    np_accuracy_gamma = np.array(accuracy_gamma)
+    idx = np_accuracy_gamma.argmax()
+    best_precision_degree_OO = np.max(np_accuracy_gamma)
+    #almacenaje del modelo que ha dado la mejor precisión para el modelo
+    #choosen_hiperparam_C_OO=value_C[idx]
+    #choosen_hiperparam_Gamma_OO=gammas[idx]
+    choosen_model = best_models_degree[idx]
+
+    best_score_per_clasificator.append(best_precision_degree_OO)
+    best_models_per_clasificator.append(choosen_model)
+
+    #print("Realizando SVM con kernel Sigmoide One vs All, el mejor hiperparámetro C es",
+    #      choosen_hiperparam_C_OA, 'el mejor hiperparámetro gamma es', choosen_hiperparam_Gamma_OA,
+    #      "da una precisión de ", best_precisionOA)
+
+    print("poly", best_precision_degree_OO,choosen_model)
+
+    ###########################################
+    # SVM Poly onevsRest
+    ###########################################
+
+    # Resetear el vector donde se guardan los resultados
+    accuracy_gamma = []  # Guarda para cada gamma el mejor score obtenido sobre todos los C
+    value_gamma = []
+    best_models_degree = []  # Guarda para cada grado el mejor modelo obtenido sobre todos los gamma sobre todos los C
+    for degree in degrees:
+        accuracy_C = []  # Guarda para cada gamma el mejor score obtenido sobre todos los C
+        best_models_gamma = []  # Guarda para cada gamma el mejor modelo obtenido sobre todos los C
+        value_C = []  # Guarda para cada gamma el mejor C obtenido sobre todos los C
+        for gamma in gammas:
+            # Resetear el vector donde se guardan los resultados
+            scores_iter_hiper = []  # Guarda los scores del barrido de C
+            best_models_C = []  # Guarda los mejores modelos del barrido de C
+            for paramC in Cs:
+                # Aplicando validacion cruzada seleccionamos el que más se aproxime a la media
+                scores = []
+                models = []
+                # Se realiza validación cruzada separando en 5 grupos
+                kf = KFold(n_splits=5)
+                for train, val in kf.split(X_muestra):
+                    X_train, X_val, y_train, y_val = X_muestra[train], X_muestra[val], y_muestra[train], y_muestra[val]
+
+                    # Definición y entrenamiento del modelo
+                    model = SVC(kernel='poly', C=paramC, gamma=gamma, degree=degree, random_state=0)
+                    model_trained = OneVsRestClassifier(model).fit(X_train, y_train)
+                    # Se guarda la precisión y el modelo obtenido
+                    prediction = model_trained.score(X_val, y_val)
+                    models.append(model_trained)
+                    scores.append(prediction)
+
+                # calculo de precisión media sobre la validación cruzada
+                mean = sum(scores) / float(len(scores))
+                # Selección y almacenaje de la precisión más cercana a la media para extraer el modelo que está mas cercano a la media
+                idx = (np.abs(scores - mean)).argmin()
+                best_models_C.append(models[idx])
+                scores_iter_hiper.append(mean)
+
+            np_scores_iter_hiper = np.array(scores_iter_hiper)
+            # Sobre C, busqueda de la mayor precisión,su hiperparámetro y su modelo correspondiente
+            idx = np_scores_iter_hiper.argmax()
+            best_precisionOA = np.amax(np_scores_iter_hiper)
+            choosen_hiperparamOA = Cs[idx]
+            # Sobre C, almacenaje del modelo que ha dado la mejor precisión para el modelo
+            best_models_gamma.append(best_models_C[idx])
+            # Sobre C, almacenaje del la precisión y del valro del hiperparámetro C para cada gamma
+            accuracy_C.append(best_precisionOA)
+            value_C.append(choosen_hiperparamOA)
+
+        np_accuracy_C = np.array(accuracy_C)
+        # Sobre C, busqueda de la mayor precisión,su hiperparámetro y su modelo correspondiente
+        idx = np_accuracy_C.argmax()
+        best_precision_gamma_OA = np.amax(np_accuracy_C)
+        choosen_gammaOA = gammas[idx]
+        # Sobre C, almacenaje del modelo que ha dado la mejor precisión para el modelo
+        best_models_degree.append(best_models_gamma[idx])
+        # Sobre C, almacenaje del la precisión y del valro del hiperparámetro C para cada gamma
+        accuracy_gamma.append(best_precision_gamma_OA)
+        value_gamma.append(choosen_gammaOA)
+
+    # Busqueda de la mayor precisión
+    np_accuracy_gamma = np.array(accuracy_gamma)
+    idx = np_accuracy_gamma.argmax()
+    best_precision_degree_OA = np.max(np_accuracy_gamma)
+    # almacenaje del modelo que ha dado la mejor precisión para el modelo
+    # choosen_hiperparam_C_OO=value_C[idx]
+    # choosen_hiperparam_Gamma_OO=gammas[idx]
+    choosen_model = best_models_degree[idx]
+
+    best_score_per_clasificator.append(best_precision_degree_OA)
+    best_models_per_clasificator.append(choosen_model)
+
+    # print("Realizando SVM con kernel Sigmoide One vs All, el mejor hiperparámetro C es",
+    #      choosen_hiperparam_C_OA, 'el mejor hiperparámetro gamma es', choosen_hiperparam_Gamma_OA,
+    #      "da una precisión de ", best_precisionOA)
+
+    print("poly", best_precision_degree_OA, choosen_model)
+
+
+
+
+
+
+
+
+
+
 
     ##################################################
     # Test
@@ -266,11 +562,17 @@ if __name__=='__main__':
     idx = np_best_score_per_clasificator.argmax()
 
     final_model = best_models_per_clasificator[idx]
-    print(final_model)
+    print("modelo seleccionado", final_model)
 
-    y_estimated = final_model.predict(X_test)
-    print(y_estimated)
-    print(y_test)
+    #y_estimated = final_model.predict(X_test)
 
-    score_test = final_model.score(X_test, y_test)
-    print(score_test)
+    for i in range (0,best_models_per_clasificator.__len__()):
+        if i==idx:
+            score_test = final_model.score(X_test, y_test)
+            print(score_test,"Precisión del que proporciona mas precisión en train")
+        else:
+            aux = best_models_per_clasificator[i].score(X_test,y_test)
+            print(aux)
+
+
+
