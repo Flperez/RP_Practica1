@@ -105,8 +105,9 @@ for i in range(0, atributos_raw.shape[1]):
 
 atributos = scale_to_unit(atributos_raw, max_atributos)
 
-id_top_atributes = [81, 60, 18,  61,  69,   3, 108,  22,  39,  50,  48,  27,   4, 135,  62,   6,  82,  55, 113,  8]
-
+id_top_atributes = np.loadtxt("top_atribute.txt").tolist()
+#id_top_atributes = [81, 60, 18,  61,  69,   3, 108,  22,  39,  50,  48,  27,   4, 135,  62,   6,  82,  55, 113,  8]
+id_top_atributes = list(map(int,id_top_atributes))
 features = atributos[:,id_top_atributes]
 
 # Código para estimar las etiquetas del conjunto de test

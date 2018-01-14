@@ -73,6 +73,7 @@ if __name__=="__main__":
     aux_toprint = clf.feature_importances_
     ###################
     id_top_atributes = (-aux_toprint).argsort()[:20]
+    np.savetxt("top_atribute.txt",id_top_atributes)
     id_top_atributes_sorted = np.sort(id_top_atributes)
     # id_top_atributes = [81, 60, 18,  61,  69,   3, 108,  22,  39,  50,  48,  27,   4, 135,  62,   6,  82,  55, 113,  8]
     # Proporciona l numero de columna (atributoi) que presenta mayor numero, con el 5, se elige el top 5
